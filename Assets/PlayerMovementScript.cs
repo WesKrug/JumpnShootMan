@@ -5,50 +5,57 @@ using UnityEngine;
 
 public class PlayerMovementScript : MonoBehaviour
 {
+    public AnchorLook TargetAnchor;
     public CharacterController controller;
 
-    public float speed = 12f;
-
-    public float Gravity = -9.81f;
-
-    public Transform GroundCheck;
-    public float GroundDistance = 0.4f;
-    public LayerMask groundMask;
-    public AnchorLook TargetAnchor;
-    public Vector3 Velocity;
-    bool isGrounded;
-
     // Update is called once per frame
-    void Update()
+    public float walkingSpeed = 6.0f;
+    public float jumpHeight = 5.0f;
+    public float gravity = 9.81f;
+    private Vector3 movement;
+    private Vector3 jumpVelocity = Vector3.zero;
+    private float airSpeed = 4.0f;
+    private float airFriction = 0.65f;
+
+    private void Update()
     {
-        isGrounded = Physics.CheckSphere(GroundCheck.position, GroundDistance, groundMask);
-
-        if (isGrounded && Velocity.y < 0)
-            Velocity.y = -2f;
-
-        if (Input.GetKey(KeyCode.Space))
-        {
-            Velocity.y = 0f;
-            controller.Move(new Vector3(0, transform.forward.y + speed * Time.deltaTime));
-        }
-
-        if (TargetAnchor != null && Input.GetKey(KeyCode.Mouse0))
-        {
-            var toAnchor = (transform.position - TargetAnchor.transform.position).normalized;
-            controller.Move(toAnchor *= .5f);
-        }
-
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        
-        controller.Move(move * speed * Time.deltaTime);
+        movement = new Vector3(x, 0, z);
+        movement = transform.TransformDirection(movement);
+        if (controller.isGrounded)
+        {
+            controller.slopeLimit = 45.0f;
+            movement *= walkingSpeed;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                jumpVelocity = movement * airFriction;
+                jumpVelocity.y = jumpHeight;
+                controller.slopeLimit = 90.0f;
+            }
+            else
+            {
+                jumpVelocity = Vector3.zero;
+            }
+        }
+        else
+        {
+            movement *= airSpeed;
+        }
 
-        //controller.Move(controller.velocity * Time.deltaTime);
+        if (TargetAnchor != null && Input.GetKey(KeyCode.E))
+        {
+            var pullVector = (TargetAnchor.transform.position - transform.position).normalized;
+            jumpVelocity = pullVector * 20f;
+        }
+        if (TargetAnchor != null && Input.GetKey(KeyCode.R))
+        {
+            var pushVector = (TargetAnchor.transform.position - transform.position).normalized * -1f;
+            jumpVelocity = pushVector * 20f;
+        }
 
-        Velocity.y += Math.Min(Gravity * Time.deltaTime, -9.81f);
-
-        controller.Move(Velocity * Time.deltaTime);
+        jumpVelocity.y -= gravity * Time.deltaTime;
+        controller.Move((movement + jumpVelocity) * Time.deltaTime);
     }
 }
