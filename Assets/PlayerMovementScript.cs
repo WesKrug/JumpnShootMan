@@ -48,12 +48,12 @@ public class PlayerMovementScript : MonoBehaviour
         if (TargetAnchor != null && Input.GetKey(KeyCode.E))
         {
             var pullVector = (TargetAnchor.transform.position - transform.position).normalized;
-            jumpVelocity = pullVector * alomanticConstant;
+            jumpVelocity = (jumpVelocity * .25f + pullVector * .75f).normalized * alomanticConstant;
         }
         if (TargetAnchor != null && Input.GetKey(KeyCode.R))
         {
             var pushVector = (TargetAnchor.transform.position - transform.position).normalized * -1f;
-            jumpVelocity = pushVector * alomanticConstant;
+            jumpVelocity = (jumpVelocity * .25f +  pushVector * .75f).normalized * alomanticConstant;
         }
 
         jumpVelocity.y -= gravity * Time.deltaTime;
