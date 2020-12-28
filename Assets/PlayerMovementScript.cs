@@ -16,6 +16,7 @@ public class PlayerMovementScript : MonoBehaviour
     private Vector3 jumpVelocity = Vector3.zero;
     private float airSpeed = 4.0f;
     private float airFriction = 0.65f;
+    private float alomanticConstant = 20f;
 
     private void Update()
     {
@@ -47,12 +48,12 @@ public class PlayerMovementScript : MonoBehaviour
         if (TargetAnchor != null && Input.GetKey(KeyCode.E))
         {
             var pullVector = (TargetAnchor.transform.position - transform.position).normalized;
-            jumpVelocity = pullVector * 20f;
+            jumpVelocity = pullVector * alomanticConstant;
         }
         if (TargetAnchor != null && Input.GetKey(KeyCode.R))
         {
             var pushVector = (TargetAnchor.transform.position - transform.position).normalized * -1f;
-            jumpVelocity = pushVector * 20f;
+            jumpVelocity = pushVector * alomanticConstant;
         }
 
         jumpVelocity.y -= gravity * Time.deltaTime;
