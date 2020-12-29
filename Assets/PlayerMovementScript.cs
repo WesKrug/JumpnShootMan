@@ -16,9 +16,16 @@ public class PlayerMovementScript : MonoBehaviour
     private Vector3 jumpVelocity = Vector3.zero;
     private float airSpeed = 4.0f;
     private float airFriction = 0.65f;
-    private float alomanticConstant = 20f;
+    private float ALLOMANTIC_CONSTANT = 20f;
 
     private void Update()
+    {
+        HandleMovement();
+
+        ShowStrands();
+    }
+
+    private void HandleMovement()
     {
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
@@ -48,15 +55,26 @@ public class PlayerMovementScript : MonoBehaviour
         if (TargetAnchor != null && Input.GetKey(KeyCode.E))
         {
             var pullVector = (TargetAnchor.transform.position - transform.position).normalized;
-            jumpVelocity = (jumpVelocity * .25f + pullVector * .75f).normalized * alomanticConstant;
+            jumpVelocity = (jumpVelocity * .25f + pullVector * .75f).normalized * ALLOMANTIC_CONSTANT;
         }
         if (TargetAnchor != null && Input.GetKey(KeyCode.R))
         {
             var pushVector = (TargetAnchor.transform.position - transform.position).normalized * -1f;
-            jumpVelocity = (jumpVelocity * .25f +  pushVector * .75f).normalized * alomanticConstant;
+            jumpVelocity = (jumpVelocity * .25f + pushVector * .75f).normalized * ALLOMANTIC_CONSTANT;
         }
 
         jumpVelocity.y -= gravity * Time.deltaTime;
         controller.Move((movement + jumpVelocity) * Time.deltaTime);
+    }
+
+    private void ShowStrands()
+    {
+        if (TargetAnchor != null)
+        {
+            var renderer = GetComponent<LineRenderer>();
+            renderer.SetPositions(new Vector3[2] { transform.position, TargetAnchor.transform.position });
+            renderer.startWidth = .5f;
+            renderer.endWidth = .5f;
+        }
     }
 }
